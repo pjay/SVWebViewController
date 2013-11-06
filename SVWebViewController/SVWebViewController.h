@@ -13,6 +13,7 @@
 @protocol SVWebViewDelegate <NSObject>
 
 @optional
+- (BOOL)svWebView:(UIWebView*)webView shouldStartLoadWithRequest:(NSURLRequest*)request navigationType:(UIWebViewNavigationType)navigationType;
 - (void)svWebViewDidStartLoad:(UIWebView*)webView;
 - (void)svWebViewDidFinishLoad:(UIWebView*)webView;
 - (void)svWebView:(UIWebView*)webView didFailLoadWithError:(NSError *)error;

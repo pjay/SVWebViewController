@@ -287,6 +287,14 @@
 #pragma mark -
 #pragma mark UIWebViewDelegate
 
+- (BOOL)webView:(UIWebView *)webView shouldStartLoadWithRequest:(NSURLRequest *)request navigationType:(UIWebViewNavigationType)navigationType {
+    if ([self.svDelegate respondsToSelector:@selector(svWebView:shouldStartLoadWithRequest:navigationType:)]) {
+        return [self.svDelegate svWebView:webView shouldStartLoadWithRequest:request navigationType:navigationType];
+    }
+    
+    return YES;
+}
+
 - (void)webViewDidStartLoad:(UIWebView *)webView {
 	[[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
     [self updateToolbarItems];
