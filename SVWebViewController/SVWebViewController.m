@@ -8,6 +8,15 @@
 
 #import "SVWebViewController.h"
 
+static NSUInteger DeviceSystemMajorVersion() {
+    static NSUInteger deviceSystemMajorVersion;
+    static dispatch_once_t onceToken;
+	dispatch_once(&onceToken, ^{
+		deviceSystemMajorVersion = [[[[[UIDevice currentDevice] systemVersion] componentsSeparatedByString:@"."] firstObject] intValue];
+	});
+	return deviceSystemMajorVersion;
+}
+
 @interface SVWebViewController () <UIWebViewDelegate, UIActionSheetDelegate, MFMailComposeViewControllerDelegate>
 
 @property (nonatomic, strong, readonly) UIBarButtonItem *backBarButtonItem;
@@ -214,6 +223,7 @@
     UIBarButtonItem *fixedSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFixedSpace target:nil action:nil];
     fixedSpace.width = 5.0f;
     UIBarButtonItem *flexibleSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
+    UIBarButtonItem *flexibleOrFixedSpace = DeviceSystemMajorVersion() >= 7 ? fixedSpace : flexibleSpace;
     
     if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
         NSArray *items;
@@ -224,9 +234,9 @@
             items = [NSArray arrayWithObjects:
                      fixedSpace,
                      refreshStopBarButtonItem,
-                     flexibleSpace,
+                     flexibleOrFixedSpace,
                      self.backBarButtonItem,
-                     flexibleSpace,
+                     flexibleOrFixedSpace,
                      self.forwardBarButtonItem,
                      fixedSpace,
                      nil];
@@ -234,21 +244,25 @@
             items = [NSArray arrayWithObjects:
                      fixedSpace,
                      refreshStopBarButtonItem,
-                     flexibleSpace,
+                     flexibleOrFixedSpace,
                      self.backBarButtonItem,
-                     flexibleSpace,
+                     flexibleOrFixedSpace,
                      self.forwardBarButtonItem,
-                     flexibleSpace,
+                     flexibleOrFixedSpace,
                      self.actionBarButtonItem,
                      fixedSpace,
                      nil];
         }
         
-        UIToolbar *toolbar = [[UIToolbar alloc] initWithFrame:CGRectMake(0.0f, 0.0f, toolbarWidth, 44.0f)];
-        toolbar.items = items;
-				toolbar.barStyle = self.navigationController.navigationBar.barStyle;
-        toolbar.tintColor = self.navigationController.navigationBar.tintColor;
-        self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithCustomView:toolbar];
+        if (DeviceSystemMajorVersion() >= 7) {
+            self.navigationItem.rightBarButtonItems = [[items reverseObjectEnumerator] allObjects];
+        } else {
+            UIToolbar *toolbar = [[UIToolbar alloc] initWithFrame:CGRectMake(0.0f, 0.0f, toolbarWidth, 44.0f)];
+            toolbar.items = items;
+            toolbar.barStyle = self.navigationController.navigationBar.barStyle;
+            toolbar.tintColor = self.navigationController.navigationBar.tintColor;
+            self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithCustomView:toolbar];
+        }
     } 
     
     else {
